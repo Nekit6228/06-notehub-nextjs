@@ -1,10 +1,6 @@
 import NoteDetailsClient from './NoteDetails.client';
 
-interface Props {
-  params: { id: string };
-}
-
-export default async function NoteDetailsPage({ params }: Props) {
+export default function NoteDetailsPage({ params }: { params: { id: string } }) {
   const noteId = Number(params.id);
   return <NoteDetailsClient noteId={noteId} />;
 }
