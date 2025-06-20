@@ -28,7 +28,6 @@ export default function NotesClient() {
   const notesQuery = useQuery<FetchNotesResponse, Error>({
     queryKey: ['notes', debounced, currentPage],
     queryFn: () => fetchNotes(debounced, currentPage),
-    keepPreviousData: true,
   });
 
   if (notesQuery.isLoading)
