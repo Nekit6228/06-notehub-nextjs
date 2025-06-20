@@ -1,6 +1,7 @@
 'use client';
+
 import { useState } from 'react';
-import css from './Notes.module.css'; 
+import css from './Notes.module.css';
 import SearchBox from '@/components/SearchBox/SearchBox';
 import NoteList from '@/components/NoteList/NoteList';
 import Pagination from '@/components/Pagination/Pagination';
@@ -11,6 +12,12 @@ import ErrorMessage from './error';
 import { useDebounce } from 'use-debounce';
 import { useQuery } from '@tanstack/react-query';
 import { fetchNotes } from '@/lib/api';
+import { Note } from '@/types/notes';
+
+interface FetchNotesResponse {
+  notes: Note[];
+  totalPages: number;
+}
 
 export default function NotesClient() {
   const [inputValue, setInputValue] = useState('');
@@ -18,23 +25,36 @@ export default function NotesClient() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [debounced] = useDebounce(inputValue, 500);
 
-  const notes = useQuery({
+  const notesQuery = useQuery<FetchNotesResponse, Error>({
     queryKey: ['notes', debounced, currentPage],
     queryFn: () => fetchNotes(debounced, currentPage),
+    keepPreviousData: true,
   });
 
-  if (notes.isLoading)
-    return <div className={css.loaderOverlay}><Loader /></div>;
-  if (notes.isError)
-    return <div className={css.errorOverlay}><ErrorMessage message={notes.error.message} /></div>;
+  if (notesQuery.isLoading)
+    return (
+      <div className={css.loaderOverlay}>
+        <Loader />
+      </div>
+    );
+
+  if (notesQuery.isError)
+    return (
+      <div className={css.errorOverlay}>
+        <ErrorMessage message={notesQuery.error?.message ?? 'Unknown error'} />
+      </div>
+    );
+
+  const notes = notesQuery.data?.notes ?? [];
+  const totalPages = notesQuery.data?.totalPages ?? 0;
 
   return (
     <div className={css.app}>
       <header className={css.toolbar}>
         <SearchBox value={inputValue} onSearch={setInputValue} />
-        {notes.data?.totalPages > 0 && (
+        {totalPages > 0 && (
           <Pagination
-            totalPages={notes.data.totalPages}
+            totalPages={totalPages}
             currentPage={currentPage}
             onPageChange={setCurrentPage}
           />
@@ -43,7 +63,7 @@ export default function NotesClient() {
           Create note +
         </button>
       </header>
-      <NoteList notes={notes.data.notes} />
+      <NoteList notes={notes} />
       {isModalOpen && (
         <NoteModal onClose={() => setIsModalOpen(false)}>
           <NoteForm onClose={() => setIsModalOpen(false)} />
