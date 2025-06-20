@@ -40,7 +40,7 @@ export default function NotesClient() {
   if (notesQuery.isError)
     return (
       <div className={css.errorOverlay}>
-        <ErrorMessage message={notesQuery.error?.message ?? 'Unknown error'} />
+        <ErrorMessage />
       </div>
     );
 
