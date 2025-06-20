@@ -7,12 +7,12 @@ import NoteList from '@/components/NoteList/NoteList';
 import Pagination from '@/components/Pagination/Pagination';
 import NoteModal from '@/components/NoteModal/NoteModal';
 import NoteForm from '@/components/NoteForm/NoteForm';
-import Loader from './loader';
+import Loader from './loading';
 import ErrorMessage from './error';
 import { useDebounce } from 'use-debounce';
 import { useQuery } from '@tanstack/react-query';
 import { fetchNotes } from '@/lib/api';
-import { Note } from '@/types/notes';
+import { Note } from '@/types/note';
 
 interface FetchNotesResponse {
   notes: Note[];
