@@ -3,40 +3,45 @@
 import { useParams } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
 import { fetchNoteById } from '@/lib/api';
+import { Note } from '@/types/note';
 import css from './NoteDetails.module.css';
 import Loader from '../../loading';
-import Error from '../error';
+import ErrorMessage from './error';
 
-export default function NoteDetailsClient() {
+export default function NoteDetails({ id }: { id: number }) {
   const params = useParams();
-  const id = Number(params?.id);
+  const noteId = id || parseInt(params.id as string, 10);
 
-  const {
-    data: note,
-    isLoading,
-    isError,
-  } = useQuery({
-    queryKey: ['note', id],
-    queryFn: () => fetchNoteById(id),
+  const { data, isLoading, isError, error } = useQuery<Note, Error>({
+    queryKey: ['note', noteId],
+    queryFn: () => fetchNoteById(noteId),
+    refetchOnMount: false,
   });
 
-  if (isLoading) {
-    return <Loader/>;
-  }
+  if (isLoading)
+    return (
+      <div className={css.loaderOverlay}>
+        <Loader />
+      </div>
+    );
 
-  if (isError || !note) {
-    return <Error/>;
-  }
+  if (isError)
+    return (
+      <div className={css.errorOverlay}>
+        <ErrorMessage error={error} />
+      </div>
+    );
+
+  if (!data) return null;
 
   return (
     <div className={css.container}>
-      <div className={css.item}>
-        <div className={css.header}>
-          <h2>{note.title}</h2>
-          <button className={css.editBtn}>Edit note</button>
-        </div>
-        <p className={css.content}>{note.content}</p>
-        <p className={css.date}>Created: {new Date(note.createdAt).toLocaleString()}</p>
+      <h1 className={css.title}>{data.title}</h1>
+      <p className={css.content}>{data.content}</p>
+      <div className={css.footer}>
+        <span className={css.tag}>{data.tag}</span>
+        <p>Created: {new Date(data.createdAt).toLocaleDateString()}</p>
+        <p>Updated: {new Date(data.updatedAt).toLocaleDateString()}</p>
       </div>
     </div>
   );

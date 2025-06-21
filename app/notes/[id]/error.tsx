@@ -1,22 +1,20 @@
 'use client';
+
 import css from '../error.module.css';
 
-interface ErrorOverlayProps {
-  message?: string;
-  onRetry?: () => void;
+interface ErrorProps {
+  error: Error;
+  reset: () => void;
 }
 
-export default function Error({ message = "Something went wrong.", onRetry }: ErrorOverlayProps) {
+export default function ErrorMessage({ error, reset }: ErrorProps) {
   return (
-    <div className={css.overlay}>
-      <div className={css.errorBox}>
-        <p>{message}</p>
-        {onRetry && (
-          <button onClick={onRetry} className={css.retryButton}>
-            Retry
-          </button>
-        )}
-      </div>
+    <div className={css.error}>
+      <h2>Something went wrong!</h2>
+      <p>{error.message}</p>
+      <button onClick={reset} className={css.button}>
+        Try again
+      </button>
     </div>
   );
 }

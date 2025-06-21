@@ -19,7 +19,11 @@ interface FetchNotesResponse {
   totalPages: number;
 }
 
-export default function NotesClient() {
+interface NotesClientProps {
+  initialData: FetchNotesResponse;
+}
+
+export default function NotesClient({ initialData }: NotesClientProps) {
   const [inputValue, setInputValue] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -28,6 +32,7 @@ export default function NotesClient() {
   const notesQuery = useQuery<FetchNotesResponse, Error>({
     queryKey: ['notes', debounced, currentPage],
     queryFn: () => fetchNotes(debounced, currentPage),
+    initialData,
   });
 
   if (notesQuery.isLoading)
@@ -40,7 +45,7 @@ export default function NotesClient() {
   if (notesQuery.isError)
     return (
       <div className={css.errorOverlay}>
-        <ErrorMessage />
+        <ErrorMessage error={notesQuery.error} />
       </div>
     );
 
