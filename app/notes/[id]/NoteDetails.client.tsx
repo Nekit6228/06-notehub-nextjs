@@ -1,48 +1,53 @@
 'use client';
 
-import { useParams } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
 import { fetchNoteById } from '@/lib/api';
-import { Note } from '@/types/note';
-import css from './NoteDetails.module.css';
-import Loader from '../../loading';
 import ErrorMessage from './error';
+import Loading from '@/app/loading';
+import css from './NoteDetails.module.css'; 
 
-export default function NoteDetails({ id }: { id: number }) {
-  const params = useParams();
-  const noteId = id || parseInt(params.id as string, 10);
+interface NoteDetailsProps {
+  id: number;
+}
 
-  const { data, isLoading, isError, error } = useQuery<Note, Error>({
-    queryKey: ['note', noteId],
-    queryFn: () => fetchNoteById(noteId),
-    refetchOnMount: false,
+const NoteDetails: React.FC<NoteDetailsProps> = ({ id }) => {
+  const { data, error, isLoading, refetch } = useQuery({
+    queryKey: ['note', id],
+    queryFn: () => fetchNoteById(id),
   });
 
-  if (isLoading)
+  if (isLoading) {
+    return <Loading />;
+  }
+
+  if (error) {
     return (
-      <div className={css.loaderOverlay}>
-        <Loader />
+      <div > 
+        <ErrorMessage error={error} reset={() => refetch()} />
       </div>
     );
+  }
 
-  if (isError)
-    return (
-      <div className={css.errorOverlay}>
-        <ErrorMessage error={error} />
-      </div>
-    );
-
-  if (!data) return null;
+  if (!data) {
+    return <div className={css.noData}>No data found</div>;
+  }
 
   return (
     <div className={css.container}>
-      <h1 className={css.title}>{data.title}</h1>
-      <p className={css.content}>{data.content}</p>
-      <div className={css.footer}>
-        <span className={css.tag}>{data.tag}</span>
-        <p>Created: {new Date(data.createdAt).toLocaleDateString()}</p>
-        <p>Updated: {new Date(data.updatedAt).toLocaleDateString()}</p>
+      <div className={css.item}>
+        <div className={css.header}>
+          <h2>{data.title}</h2>
+          <button className={css.editBtn}>Edit note</button>
+        </div>
+        <p className={css.content}>{data.content}</p>
+        <p className={css.date}>
+          {data.createdAt
+            ? new Date(data.createdAt).toLocaleDateString()
+            : 'Unknown date'}
+        </p>
       </div>
     </div>
   );
-}
+};
+
+export default NoteDetails;

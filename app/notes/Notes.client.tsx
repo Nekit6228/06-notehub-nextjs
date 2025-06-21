@@ -8,7 +8,7 @@ import Pagination from '@/components/Pagination/Pagination';
 import NoteModal from '@/components/NoteModal/NoteModal';
 import NoteForm from '@/components/NoteForm/NoteForm';
 import Loader from '../loading';
-import ErrorMessage from './error';
+import Error from './error'; 
 import { useDebounce } from 'use-debounce';
 import { useQuery } from '@tanstack/react-query';
 import { fetchNotes } from '@/lib/api';
@@ -35,19 +35,21 @@ export default function NotesClient({ initialData }: NotesClientProps) {
     initialData,
   });
 
-  if (notesQuery.isLoading)
+  if (notesQuery.isLoading) {
     return (
       <div className={css.loaderOverlay}>
         <Loader />
       </div>
     );
+  }
 
-  if (notesQuery.isError)
+  if (notesQuery.isError) {
     return (
       <div className={css.errorOverlay}>
-        <ErrorMessage error={notesQuery.error} />
+        <Error message={notesQuery.error.message} onRetry={() => notesQuery.refetch()} />
       </div>
     );
+  }
 
   const notes = notesQuery.data?.notes ?? [];
   const totalPages = notesQuery.data?.totalPages ?? 0;

@@ -1,17 +1,16 @@
-
+import { NextPage } from 'next';
 import { fetchNoteById } from '@/lib/api';
 import NoteDetails from './NoteDetails.client';
 import { QueryClient, dehydrate } from '@tanstack/react-query';
 import { HydrationBoundary } from '@tanstack/react-query';
 
-
 interface NotePageProps {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }
 
-
-export default async function NotePage({ params }: NotePageProps) {
-  const id = parseInt(params.id, 10);
+const NotePage: NextPage<NotePageProps> = async ({ params }) => {
+  const resolvedParams = await params; 
+  const id = parseInt(resolvedParams.id, 10);
 
   const queryClient = new QueryClient();
   await queryClient.prefetchQuery({
@@ -24,4 +23,6 @@ export default async function NotePage({ params }: NotePageProps) {
       <NoteDetails id={id} />
     </HydrationBoundary>
   );
-}
+};
+
+export default NotePage;
